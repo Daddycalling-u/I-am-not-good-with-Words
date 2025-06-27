@@ -1,0 +1,58 @@
+/* src/styles/LineOptionsDialog.css */
+
+.dialog-container {
+  position: absolute;
+  top: var(--dialog-top);
+  left: var(--dialog-left);
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 8px;
+  z-index: 999;
+  width: 160px;
+  padding: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.dialog-scrollable {
+  max-height: 180px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.dialog-scrollable button {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  color: #eee;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dialog-scrollable button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.color-palette-dropdown {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #555;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
