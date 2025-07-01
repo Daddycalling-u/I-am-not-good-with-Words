@@ -1,15 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { useNavigate } from 'react-router-dom'; 
-import ScrollBar from '../components/ScrollBar';
-import FloatingNote from '../components/FloatingNote';
-import '../styles/PoemPage.css';
-import { splitPoemIntoPages } from '../utils/splitPoemIntoPages';
+import { useNavigate } from 'react-router-dom';
+import ScrollBar from '@components/ScrollBar';
+import FloatingNote from '@components/FloatingNote';
+import '@styles/PoemPage.css';
+import { splitPoemIntoPages } from '@utils/splitPoemIntoPages';
 
 const PoemPage = ({ poemData, currentPage, totalPages }) => {
-  // -----------------------------
-  // Local State
-  // -----------------------------
   const [showNote, setShowNote] = useState(false);
   const [selectedNote, setSelectedNote] = useState('');
   const [isAuthorNote, setIsAuthorNote] = useState(false);
@@ -18,31 +15,23 @@ const PoemPage = ({ poemData, currentPage, totalPages }) => {
   const contentRef = useRef(null);
   const navigate = useNavigate();
 
-  // -----------------------------
-  // Process & Split Poem Content
-  // -----------------------------
   useEffect(() => {
     if (poemData?.content) {
-      // Split poem into pages with alignment metadata
       const result = splitPoemIntoPages(poemData.content);
       setPages(result);
-      console.log("Split pages result:", result);
     }
 
-    // Trigger fade animation
     const el = contentRef.current;
     if (el) {
       el.classList.remove('show');
-      void el.offsetWidth; // Trigger reflow
+      void el.offsetWidth;
       el.classList.add('show');
     }
   }, [poemData]);
 
-  // -----------------------------
-  // Navigation Logic
-  // -----------------------------
   const goToPreviousPage = () => {
     if (currentPage > 1) navigate(`/poem/${currentPage - 1}`);
+    else navigate('/');
   };
 
   const goToNextPage = () => {
@@ -56,45 +45,40 @@ const PoemPage = ({ poemData, currentPage, totalPages }) => {
     trackTouch: true,
   });
 
-  // -----------------------------
-  // Determine Current Page Content
-  // -----------------------------
   const pageIndex = currentPage - poemData.startPage;
-  const isFirstPage = pageIndex === 0;
   const currentPageData = pages[pageIndex] || { content: 'Loading...', isCentered: false };
+  const backLabel = currentPage === 1 ? 'Index' : `Page ${currentPage - 1}`;
 
   return (
     <div className="poem-page-container" {...handlers}>
-      
-      {/* Click zones for navigation */}
-      <div className="click-zones">
-        <div className="left-zone" onClick={goToPreviousPage}></div>
-        <div className="right-zone" onClick={goToNextPage}></div>
+      {/* 🔙 Back and ❌ Close */}
+      <div className="top-bar">
+        <button className="back-button" onClick={goToPreviousPage}>{`← ${backLabel}`}</button>
+        <button className="close-button" onClick={() => navigate('/index')}>×</button>
       </div>
 
-      {/* Poem Content Area */}
-      <div ref={contentRef} className="poem-content">
-  {pageIndex === 0 && (
-    <h1 className="poem-title">{poemData.title}</h1>
-  )}
-  <div className={`poem-body ${page?.isCentered ? 'center-aligned' : 'left-aligned'}`}>
-    <pre>{page?.content}</pre>
-  </div>
-</div>
+      {/* 📚 Menu / Library */}
+      <button className="menu-button">☰</button>
 
-      {/* Bottom Scrollbar */}
+      {/* 📝 Poem Content */}
+      <div ref={contentRef} className="poem-content">
+        {pageIndex === 0 && <h1 className="poem-title">{poemData.title}</h1>}
+        <div className={`poem-body ${currentPageData.isCentered ? 'center-aligned' : 'left-aligned'}`}>
+          <pre>{currentPageData.content}</pre>
+        </div>
+      </div>
+
+      {/* 📟 Page Indicator ScrollBar */}
       <ScrollBar currentPage={currentPage} totalPages={totalPages} />
 
-      {/* Test Button (Remove in production) */}
+      {/* 🧪 Test Note Button */}
       <button className="test-note-btn" onClick={() => {
         setSelectedNote("Test note from the poet...");
         setIsAuthorNote(false);
         setShowNote(true);
-      }}>
-        Show Test Note
-      </button>
+      }}>Show Test Note</button>
 
-      {/* Floating Note UI */}
+      {/* ✨ Floating Note UI */}
       {showNote && (
         <FloatingNote
           note={selectedNote}
@@ -117,6 +101,7 @@ const PoemPage = ({ poemData, currentPage, totalPages }) => {
 };
 
 export default PoemPage;
+
 
 
 

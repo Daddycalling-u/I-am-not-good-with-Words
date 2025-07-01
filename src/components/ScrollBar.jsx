@@ -1,6 +1,6 @@
 // src/components/ScrollBar.jsx
 import React, { useState, useEffect } from 'react';
-import '../styles/ScrollBar.css';
+import './ScrollBar.css';
 
 const ScrollBar = ({ currentPage, totalPages }) => {
   const [visible, setVisible] = useState(false);

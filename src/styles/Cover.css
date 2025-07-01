@@ -56,3 +56,39 @@
     pointer-events: none;
   }
 }
+
+.cover-image {
+  opacity: 0;
+  animation: fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+.cover-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #f4e6c2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.cover-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow:0 0 40px rgda(0, 0, 0, 0.4);
+  pointer-events: none;
+  user-select: none;
+  border-radius: 10px;
+}
+
+.cover-container:hover {
+  filter: brightness(1.1) saturate(1.2);
+}

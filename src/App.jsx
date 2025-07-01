@@ -1,17 +1,22 @@
-
 // src/App.jsx
 import React, { useEffect, useState } from "react";
-import PageEngine from "./components/PageEngine";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "./firebase"; // Firebase instance
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+import Cover from '@pages/Cover';
+import AuthPage from '@pages/AuthPage';
+import IndexPage from '@pages/Index';
+import PoemPage from '@pages/PoemPage';
+
+import { auth, db } from './firebase/firebaseConfig';
 
 function App() {
-  const [pages, setPages] = useState([]);
+  const [poems, setPoems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // 👈 optional error state
 
-  // 🔧 Helper: Breaks a poem's content into multiple page-sized chunks
   const splitPoemIntoPages = (content, linesPerPage = 22) => {
-    const lines = content.trim().split('\n').filter(Boolean); // Remove empty lines
+    const lines = content.trim().split('\n').filter(Boolean);
     const chunks = [];
     for (let i = 0; i < lines.length; i += linesPerPage) {
       const chunk = lines.slice(i, i + linesPerPage).join('\n');
@@ -22,39 +27,66 @@ function App() {
 
   useEffect(() => {
     const fetchPoems = async () => {
-      const querySnapshot = await getDocs(collection(db, "poems"));
-      const poems = querySnapshot.docs.map(doc => doc.data());
+      try {
+        const querySnapshot = await getDocs(collection(db, "poems"));
+        const rawPoems = querySnapshot.docs.map(doc => doc.data());
 
-      // ✅ Sort poems by 'order' field to maintain desired chronology
-      poems.sort((a, b) => a.order - b.order);
+        rawPoems.sort((a, b) => a.order - b.order);
 
-      // 📜 Break each poem into one or more pages
-      const flatPages = poems.flatMap(poem => {
-        const chunks = splitPoemIntoPages(poem.content);
-        const isSinglePagePoem = chunks.length === 1;
+        let currentPage = 1;
+        const processedPoems = rawPoems.map(poem => {
+          const pages = splitPoemIntoPages(poem.content);
+          const startPage = currentPage;
+          const pageObjects = pages.map((chunk, index) => ({
+            content: chunk,
+            isCentered: pages.length === 1,
+            title: index === 0 ? poem.title : "",
+            pageNum: currentPage + index
+          }));
+          currentPage += pages.length;
+          return {
+            ...poem,
+            pages: pageObjects,
+            startPage,
+            endPage: currentPage - 1
+          };
+        });
 
-        return chunks.map((chunk, index) => ({
-          title: index === 0 ? poem.title : '',           // Show title only on first page
-          content: chunk,                                 // Page content
-          isCentered: isSinglePagePoem                    // Center-align if only 1 page
-        }));
-      });
-
-      setPages(flatPages);    // 🔃 Update state with processed pages
-      setLoading(false);      // ✅ Done loading
+        setPoems(processedPoems);
+        setLoading(false);
+      } catch (err) {
+        console.error("🔥 Failed to fetch poems from Firestore:", err);
+        setError("Something went wrong while loading your book.");
+        setLoading(false);
+      }
     };
 
     fetchPoems();
   }, []);
 
-  // 📟 Optional loading screen while data fetches
-  if (loading) return <div className="loading-screen">Loading your book...</div>;
+  if (loading) return <div className="loading-screen">📖 Loading your book...</div>;
+  if (error) return <div className="error-screen">⚠️ {error}</div>;
 
-  // 🧠 Send fully processed pages to the PageEngine
-  return <PageEngine pages={pages} />;
+  const totalPages = poems.reduce((acc, poem) => acc + poem.pages.length, 0);
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Cover />} />
+        <Route path="/authpage" element={<AuthPage />} />
+        <Route path="/index" element={<IndexPage poems={poems} />} />
+        <Route
+          path="/poem/:pageNum"
+          element={<PoemPage poemBook={poems} totalPages={totalPages} />}
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
+
 
 
 

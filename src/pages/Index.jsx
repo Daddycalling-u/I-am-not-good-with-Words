@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import { db } from '../firebase'; // adjust path if needed
+import { db } from '../firebase/firebaseConfig'; // adjust path if needed
 import { Link } from 'react-router-dom';
 
 const IndexPage = () => {
