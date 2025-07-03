@@ -8,7 +8,7 @@ import AuthPage from '@pages/AuthPage';
 import IndexPage from '@pages/Index';
 import PoemPage from '@pages/PoemPage';
 
-import { auth, db } from './firebase/firebaseconfig';
+import { auth, db } from './firebase/firebaseConfig';
 
 function App() {
   const [poems, setPoems] = useState([]);
